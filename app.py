@@ -17,18 +17,18 @@ def create_table():
 @app.route('/')
 def main():
     d1 = {'endpoints': {
-        '/add_user': 'for adding users (required: name, email)',
-        '/users': 'to get all users',
-        '/users/<id>': 'to get one user by id',
-        '/delete_user': 'to delete user by id',
-        '/edit_user': 'to edit the user by id (can edit id, name and email)'
+        '/add_user': 'for adding users (required: name, email) - METHOD = POST',
+        '/users': 'to get all users - METHOD = GET',
+        '/users/<id>': 'to get one user by id - METHOD = GET',
+        '/delete_user': 'to delete user by id - METHOD = DELETE',
+        '/edit_user': 'to edit the user by id (can edit id, name and email) - METHOD = POST'
     }}
 
     return jsonify(d1)
 
 @app.route('/add_user', methods=['POST'])
 def add_user():
-    id = request.json['id'] if request.json['id'] != None else create_id(32)
+    id = create_id(32)
     user = User(id=id, name=request.json['name'], email=request.json['email'])
 
     db.session.add(user)
