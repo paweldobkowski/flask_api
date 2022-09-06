@@ -21,7 +21,7 @@ def create_table():
 def main():
     d1 = {'endpoints': {
         '/add_user': 'for adding users (required: name, email) - METHOD = POST',
-        '/users': 'to get all users - METHOD = GET',
+        '/users': 'query parameters are pageIndex (starts at 0) and pageSize, default are 0 and 5 - METHOD = GET',
         '/users/<id>': 'to get one user by id - METHOD = GET',
         '/delete_user': 'to delete user by id - METHOD = DELETE',
         '/edit_user': 'to edit the user by id (can edit id, name and email) - METHOD = POST'
@@ -41,11 +41,20 @@ def add_user():
 
 @app.route('/users')
 def get_users():
-    users = User.query.all()
+    args = request.args
+    pageIndex, pageSize = args.get("pageIndex", 0, type=int) + 1, args.get("pageSize", 5, type=int)
 
-    result = [{'id': user.id, 'name': user.name, 'email': user.email} for user in users]
+    users = User.query.paginate(page=pageIndex, per_page=pageSize)
 
-    return jsonify({'users': result})
+    users_info = [{'id': user.id, 'name': user.name, 'email': user.email} for user in users.items]
+    pag_info = [{'total': users.total, 'pageIndex': pageIndex - 1, 'pageSize': pageSize, 'next': users.has_next, 'prev': users.has_prev, 'pageNumber': users.pages}]
+
+    result = {
+        'table': pag_info,
+        'users': users_info,
+    }
+
+    return jsonify(result)
 
 @app.route('/users/<id>')
 def get_user(id):
